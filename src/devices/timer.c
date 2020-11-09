@@ -60,7 +60,7 @@ timer_calibrate (void)
   /* Refine the next 8 bits of loops_per_tick. */
   high_bit = loops_per_tick;
   for (test_bit = high_bit >> 1; test_bit != high_bit >> 10; test_bit >>= 1)
-    if (!too_many_loops (high_bit | test_bit))
+    if (!too_many_loops (loops_per_tick | test_bit))
       loops_per_tick |= test_bit;
 
   printf ("%'"PRIu64" loops/s.\n", (uint64_t) loops_per_tick * TIMER_FREQ);
@@ -83,23 +83,22 @@ timer_elapsed (int64_t then)
 {
   return timer_ticks () - then;
 }
+int checkticks(int64_t ticks){
+    if(ticks<=0){
+      return 0;
+    }
+    return 1;
+}
 
 /* Sleeps for approximately TICKS timer ticks.  Interrupts must
    be turned on. */
-int checkticks(int64_t ticks)
-{
-if(ticks<=0)
-{
-  return 0;
-}
-  return 1;
-}
 
 void
 timer_sleep (int64_t ticks) 
 {
  if(checkticks(ticks)==0){
-    return;}
+    return;
+  }
   ASSERT (intr_get_level () == INTR_ON);
    enum intr_level old_level = intr_disable ();
    struct thread *current_thread = thread_current ();
@@ -183,8 +182,8 @@ static void
 timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
-  thread_foreach(check_thread_blocked,NULL);
   thread_tick ();
+  thread_foreach (blocked_thread_check,NULL);
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
