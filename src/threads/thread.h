@@ -93,7 +93,7 @@ struct thread
     int base_priority;                  /* thread’s base priority*/
     struct lock *lock_waiting;          /* the lock that thread wants*/
     struct list locks;                  /*Locks thread is holding*/
-                 /* Record the time the thread has been blocked. */
+    int64_t ticks_blocked;              /* Record the time the thread has been blocked. */
 
 
     /* Shared between thread.c and synch.c. */
